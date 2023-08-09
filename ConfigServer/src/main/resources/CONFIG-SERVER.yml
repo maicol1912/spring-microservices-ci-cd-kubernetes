@@ -1,0 +1,13 @@
+management:
+  metrics:
+    export:
+      zipkin:
+        baseUrl: ${ZIPKIN_URL:http://zipkin-svc:9411}/api/v2/spans
+        enabled: true
+  tracing:
+    brave:
+      enabled: true
+      sampler:
+        rate: 1.0
+      spans:
+        compression-enabled: true

@@ -1,0 +1,19 @@
+node{
+    stage('Checkout'){
+        checkout([$class: 'GitSCM',
+            branches:[[name: '*/main']],
+            extensions:[],
+            //estamos tomando las credendiales que definimos en las configuraciones de jenkins
+            userRemoteConfigs:[[credentialsId:'git',
+            url: 'https://github.com/maicol1912/ms-initial-setup.git']]])
+    }
+    stage('Deploy'){
+        step([$class: 'KubernetesEngineBuilder',
+        projectId: env.PROJECT_ID,
+        clusterName: env.CLUSTER,
+        location: env.ZONE,
+        manifestPattern: 'k8s/',
+        credentialsId: env.PROJECT_ID,
+        verifyDeployments: true])
+    }
+}

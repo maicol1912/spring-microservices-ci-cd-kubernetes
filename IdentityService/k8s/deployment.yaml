@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-service-app
+spec:
+  selector:
+    matchLabels:
+      app: identity-service-app
+  template:
+    metadata:
+      labels:
+        app: identity-service-app
+    spec:
+      
+      containers:
+      - name: identity-service-app
+        image: IMAGE_URL/identityservice
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8085
+        env:
+          #- name: EUREKA_SERVER_ADDRESS
+            #valueFrom:
+              #configMapKeyRef:
+                #key: eureka_service_address
+                #name: eureka-cm
+          - name: CONFIG_SERVER_URL
+            valueFrom:
+              configMapKeyRef:
+                key: config_url
+                name: config-cm
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: hostname
+                name: postgresql-cm
+          - name: POSTGRES_USER
+            valueFrom:
+              configMapKeyRef:
+                key: postgres_user
+                name: postgresql-cm
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: postgres_password
+                name: postgresql-cm
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: identity-service-svc
+spec:
+  selector:
+    app: identity-service-app
+  ports:
+  - port: 80
+    targetPort: 8085

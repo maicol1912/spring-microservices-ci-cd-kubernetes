@@ -1,0 +1,85 @@
+# PV
+# PVC
+# StatefulSet - postgresql
+# Headless
+# Config
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgresql-pvc
+spec:
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresql
+spec:
+  selector:
+    matchLabels:
+      app: postgresql
+  serviceName: postgresql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      containers:
+      - name: postgresql
+        image: postgres
+        ports:
+        - containerPort: 5432
+          name: postgresql
+        env:
+          - name: POSTGRES_USER
+            value : maicoldev 
+          - name: POSTGRES_PASSWORD
+            value : maicol123 
+          - name: POSTGRES_DB
+            value : postgres 
+        volumeMounts:
+        - name: postgresql-initdb
+          mountPath: /docker-entrypoint-initdb.d
+        - name: postgresql-persistent-storage
+          mountPath: /var/lib/postgresql
+        
+      volumes:
+        - name: postgresql-persistent-storage
+          persistentVolumeClaim: 
+            claimName: postgresql-pvc
+        - name: postgresql-initdb
+          configMap:
+            name: postgresql-initdb-cm
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-initdb-cm
+data:
+  init.sql: |
+    CREATE DATABASE identitydb;
+    CREATE DATABASE orderdb;
+    CREATE DATABASE paymentdb;
+    CREATE DATABASE productdb;
+    
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+spec:
+  clusterIP: None
+  selector:
+    app: postgresql
+  ports:
+  - port: 5432
+

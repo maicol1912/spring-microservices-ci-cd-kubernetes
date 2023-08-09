@@ -1,0 +1,11 @@
+server:
+  port: 9296
+
+spring:
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: file:./CONFIG-SERVER.yml

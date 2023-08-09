@@ -1,0 +1,36 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/orderdb
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:1234}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+  application:
+    name: ORDER-SERVICE
+  config:
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:9296}
+resilience4j:
+  circuitbreaker:
+    instances:
+      external:
+        event-consumer-buffer-size: 10 #numero de eventos almacenados
+        failure-rate-threshold: 50 #porcentaje de fallas para activar el circuitbreaker
+        minimum-number-of-calls: 5 #numero minimo de llamados para calcular la tasa de fallos
+        automatic-transition-from-open-to-half-open-enabled: true #si circuit esta abierto no permite solicitudes a externos dependiendo del wait
+        wait-duration-in-open-state: 5s #tiempo que pasa de estado abierto a medio abierto
+        permitted-number-of-calls-in-half-open-state: 3 #numero maximo de solicitudes para ver si el servicio responde y pasa de semi abierto a cerrado
+        sliding-window-size: 10 #para tener estadisticas sobre llamadas externas
+        sliding-window-type: COUNT_BASED #la ventana se basa en el numero de llamados
+microservices:
+  product: http://product-service-svc/product/
+  payment: http://payment-service-svc/payment/
+
+eureka:
+  client:
+    enabled: false

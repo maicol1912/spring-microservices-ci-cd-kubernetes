@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:order
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  config:
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:9296}
+
+microservices:
+  product: http://product-service-svc/product/
+  payment: http://payment-service-svc/payment/
+
+eureka:
+  client:
+    enabled: false
